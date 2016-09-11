@@ -1,4 +1,4 @@
-﻿<ion-view view-title="Entrance">
+﻿<ion-view view-title="Entrance" ng-controller="EntranceCtrl">
     <ion-content class="login-body">
         <div style="margin-top: 50px">
             <h1 class="text-center">
@@ -8,13 +8,24 @@
         </div>
         <div class="login-page">
             <div class="form">
-                <form class="login-form">
-                    <input class="input-login" type="text" placeholder="hotel id" />
-                    <input class="input-login" type="text" placeholder="private key" />
-                    <button class="on-login">login</button>
+                <form class="login-form" ng-if="!loginService.hasLoginData()">
+                    <input ng-model="user.hotelId" class="input-login" type="text" placeholder="hotel id" />
+                    <input ng-model="user.key" class="input-login" type="text" placeholder="private key" />
+                    <button class="on-login" ng-click="login(user)">login</button>
                     <p class="message">
                         Have no key?<br />
                         <a href="#">Send email to front-office manager</a>
+                    </p>
+                </form>
+            </div>
+        </div>
+        <div class="login-page" ng-if="loginService.hasLoginData()">
+            <div class="form">
+                <form class="login-form">
+                    <button class="on-login" ng-click="enterTheMatrix()">Visit the city!</button>
+                    <p class="message">
+                        Your private key is: <b>{{dataFromStorage.key}}</b><br />
+                        <a href="#">Click here</a>, if your want to change your data.
                     </p>
                 </form>
             </div>

@@ -1,23 +1,39 @@
-angular.module('starter.controllers', [])
+angular.module('krakmApp.controllers', [])
 
-.controller('AppCtrl', function ($scope, $ionicModal, $timeout) {
-
+.controller('AppCtrl', function ($scope, $state, loginService) {
+    $scope.logout = function () {
+        loginService.removeLoginData();
+        $state.go('app.entrance');
+    }
 })
 
-.controller('EntranceCtrl', function ($scope, $http) {
+.controller('EntranceCtrl', function ($scope, $http, $state, loginService, objectsFactory) {
+    $scope.data = { hotelId: 0, key: "" };
 
+    $scope.enterTheMatrix = function () {
+        if (loginService.hasLoginData()) {
+            $state.go('app.mainMap');
+        }
+    }
+    $scope.dataFromStorage = loginService.getLoginData();
+
+    $scope.login = function (user) {
+        $http({
+            method: 'GET',
+            url: 'api/mobile/byHotelId',
+            params: { hotelId: parseInt(user.hotelId, 10), key: user.key }
+        }).then(function successCallback(response) {
+            loginService.setLoginData(user);
+            objectsFactory.setObjects(response.data);
+
+            $state.go('app.mainMap');
+
+        }, function errorCallback(response) {
+            
+        });
+    }
 })
 
-.controller('PlaylistsCtrl', function ($scope) {
-    $scope.playlists = [
-      { title: 'Reggae', id: 1 },
-      { title: 'Chill', id: 2 },
-      { title: 'Dubstep', id: 3 },
-      { title: 'Indie', id: 4 },
-      { title: 'Rap', id: 5 },
-      { title: 'Cowbell', id: 6 }
-    ];
-})
+.controller('MainMapCtrl', function ($scope) {
 
-.controller('PlaylistCtrl', function ($scope, $stateParams) {
 });
