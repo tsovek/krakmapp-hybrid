@@ -8,7 +8,7 @@
                 <button class="button button-icon button-clear ion-navicon" menu-toggle="left"></button>
             </ion-nav-buttons>
         </ion-nav-bar>
-        <button class="button button-bar-positive button-fab button-fab-bottom-right">
+        <button class="button button-bar-positive-100 button-fab button-fab-bottom-right">
             <i class="icon ion-ios-navigate"></i>
         </button>
         <ion-nav-view name="menuContent"></ion-nav-view>
@@ -18,25 +18,33 @@
         <ion-header-bar class="expanded" style="background: url('img/material-graphite.jpg');">
             <img src="img/logo.png" class="avatar motion spin fade">
             <div class="menu-bottom">
-                Hello KrakmApp
+                Hello Tomasz
             </div>
         </ion-header-bar>
         <ion-content class="stable-bg has-expanded-header">
             <ion-list>
                 <ion-item nav-clear menu-close href="#/app/components">
-                    Components+
+                    Object's map
                 </ion-item>
                 <ion-item nav-clear menu-close href="#/app/extensions">
-                    Extensions
+                    Explore city by routes
                 </ion-item>
+                <ion-item nav-clear menu-close href="#/app/extensions">
+                    Configure offline notifications
+                </ion-item>
+                <ion-item nav-clear menu-close href="#/app/extensions">
+                    Daily promotions
+                </ion-item>
+                <hr />
                 <ion-item nav-clear menu-close href="#/app/lists">
-                    Motion Lists
+                    Hotel's informations
                 </ion-item>
                 <ion-item nav-clear menu-close href="#/app/motion">
-                    Motion Elements
+                    Your informations
                 </ion-item>
+                <hr />
                 <ion-item menu-close ng-click="login()">
-                    Logined
+                    Logout
                 </ion-item>
             </ion-list>
         </ion-content>

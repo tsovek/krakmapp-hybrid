@@ -8,7 +8,7 @@
 }
 
 .login-page {
-  width: 300px;
+  width: 360px;
   padding: 8% 0 0;
   margin: auto;
 }
@@ -91,6 +91,10 @@
 }
 .container .info span .fa {
   color: #EF3B3A;
+}
+
+hr {
+  margin: 0px 10px 0px 10px;
 }
 
 
