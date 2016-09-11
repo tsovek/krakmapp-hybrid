@@ -34,6 +34,13 @@ angular.module('krakmApp.controllers', [])
     }
 })
 
-.controller('MainMapCtrl', function ($scope) {
+.controller('MainMapCtrl', function ($scope, $compile, mapFactory) {
+    $scope.onInit = function () {
+        var mapOptions = mapFactory.getMapOptions();
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
+        $scope.map = map;
+
+
+    };
 });

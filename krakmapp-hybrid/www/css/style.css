@@ -1,7 +1,15 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300);
 
+#map {
+  margin: 0px 0px 0px 0px;
+  background: #FFFFFF;
+  width: 100%;
+  height: 70%;
+}
+
+
 .login-body {
-  background: #F1F3FA; /* fallback for old browsers */
+  background: #F1F3FA;
   font-family: "Roboto", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;     
