@@ -23,6 +23,49 @@
     return {
         setObjects: function (objects) {
             localStorageService.set('objectsData', objects);
+        },
+
+        getAllObjects: function () {
+            let allObjects = localStorageService.get('objectsData');
+            if (allObjects === null) {
+                return {
+                    objects: []
+                }
+            }
+            return allObjects.objects;
+        },
+        
+        getMarkerByType: function (type) {
+            var iconDefault = {
+                size: new google.maps.Size(88, 126),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(44, 63)
+            };
+            var marker = {};
+
+            switch (type) {
+                case "Monuments":
+                    iconDefault.url = 'http://localhost:8100/img/marker-red.png';
+                    return new google.maps.Marker({
+                        icon: iconDefault
+                    });
+                case "Entertainments":
+                    iconDefault.url = 'http://localhost:8100/img/marker-green.png';
+                    return new google.maps.Marker({
+                        icon: iconDefault
+                    });
+                case "Partners":
+                    iconDefault.url = 'http://localhost:8100/img/marker-blue.png';
+                    return new google.maps.Marker({
+                        icon: iconDefault
+                    });
+                default:
+                    iconDefault.url = 'http://localhost:8100/img/marker-pink.png';
+                    return new google.maps.Marker({
+                        icon: iconDefault
+                    });
+            }
         }
     }
 })
@@ -61,7 +104,6 @@
                 zoom: 17,
                 mapTypeId: google.maps.MapTypeId.ROADMAP,
                 styles: styleArray,
-                disableDefaultUI: true,
                 scaleControl: true
             };
         }

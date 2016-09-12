@@ -34,13 +34,59 @@ angular.module('krakmApp.controllers', [])
     }
 })
 
-.controller('MainMapCtrl', function ($scope, $compile, mapFactory) {
+.controller('MainMapCtrl', function ($scope, $compile, mapFactory, objectsFactory) {
     $scope.onInit = function () {
-        var mapOptions = mapFactory.getMapOptions();
+        let mapOptions = mapFactory.getMapOptions();
         var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
+        var allObjects = objectsFactory.getAllObjects();
+        var bounds = new google.maps.LatLngBounds();
+        for (let i in allObjects.objects) {
+            let objGroup = allObjects.objects[i];
+
+            for (let j in objGroup.singleObjects) {
+                let singleObject = objGroup.singleObjects[j];
+
+                let pos = new google.maps.LatLng(singleObject.latitude, singleObject.longitude)
+                let marker = objectsFactory.getMarkerByType(objGroup.type);
+                marker.setPosition(pos);
+                marker.setMap(map);
+
+                attachWindow(marker, singleObject, objGroup.type);
+
+                bounds.extend(pos);
+            }
+        }
+        map.fitBounds(bounds);
+
         $scope.map = map;
-
-
     };
+
+    attachWindow = function(marker, obj, type) {
+        var infowindow = new google.maps.InfoWindow({
+            content: this.getInfo(obj, type),
+            maxWidth: 350
+        });
+
+        marker.addListener('click', function () {
+            infowindow.open(marker.get('map'), marker);
+        })
+    };
+
+    getInfo = function(object, type) {
+        let content =
+            '<div id="content">' +
+                '<div id="siteNotice">' +
+                // todo: image
+                '</div>' +
+                '<h4 class="firstHeading">' + object.name + '</h4>' +
+                '<div id="bodyContent">' +
+                    '<p>' + object.description + '</p>' +
+                '</div>';
+        if (type === "Partners") {
+            content += '<br /><div><a class="btn btn-block btn-info">Get Discount!</a></div>';
+        }
+        content += '</div>';
+        return content;
+    }
 });
