@@ -245,3 +245,5 @@ ModelManifest.xml
 .fake/
 
 /krakmapp-hybrid/www/lib
+/krakmapp-hybrid/platforms
+/krakmapp-hybrid/plugins
