@@ -4,7 +4,8 @@
 angular.module('krakmApp', ['ionic',
     'krakmApp.controllers', 'krakmApp.factories',
     'ionic-material',
-    'LocalStorageModule'])
+    'LocalStorageModule',
+    'ngCordova'])
 
 .run(function ($ionicPlatform) {
     $ionicPlatform.ready(function () {
@@ -51,6 +52,26 @@ angular.module('krakmApp', ['ionic',
                 'menuContent': {
                     templateUrl: 'templates/entrance.html',
                     controller: 'EntranceCtrl'
+                }
+            }
+        })
+
+        .state('app.client', {
+            url: '/client',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/client.html',
+                    controller: 'ClientCtrl'
+                }
+            }
+        })
+
+        .state('app.hotel', {
+            url: '/hotel',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/hotel.html',
+                    controller: 'HotelCtrl'
                 }
             }
         });

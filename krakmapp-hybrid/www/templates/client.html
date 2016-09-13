@@ -1,0 +1,36 @@
+﻿<ion-view view-title="Your info" ng-controller="ClientCtrl">
+    <ion-content class="login-body">
+        <div style="margin-top: 50px">
+            <h1 class="text-center">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                KrakmApp
+            </h1>
+        </div>
+        <div style="margin: 50px 10px 10px 10px">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td>{{client.name}}</td>
+                    </tr>
+                    <tr>
+                        <td>Your hotel</td>
+                        <td>{{client.hotelName}}</td>
+                    </tr>
+                    <tr>
+                        <td>Unique key</td>
+                        <td class="bold">{{client.uniqueKey}}</td>
+                    </tr>
+                    <tr class="success">
+                        <td>Checked-In</td>
+                        <td>{{client.checkIn}}</td>
+                    </tr>
+                    <tr class="danger">
+                        <td>Check-Out</td>
+                        <td>{{client.checkOut}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </ion-content>
+</ion-view>

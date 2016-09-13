@@ -1,4 +1,4 @@
-﻿<ion-view view-title="Entrance" ng-controller="EntranceCtrl">
+﻿<ion-view cache-view="false" view-title="Entrance" ng-controller="EntranceCtrl">
     <ion-content class="login-body">
         <div style="margin-top: 50px">
             <h1 class="text-center">
@@ -6,9 +6,10 @@
                 KrakmApp
             </h1>
         </div>
-        <div class="login-page">
+        <div  ng-if="!logged" class="login-page">
             <div class="form">
-                <form class="login-form" ng-if="!loginService.hasLoginData()">
+                <form class="login-form">
+                    <label ng-if="errorMsg" class="label label-danger">{{errorMsg}}</label>
                     <input ng-model="user.hotelId" class="input-login" type="text" placeholder="hotel id" />
                     <input ng-model="user.key" class="input-login" type="text" placeholder="private key" />
                     <button class="on-login" ng-click="login(user)">login</button>
@@ -19,11 +20,12 @@
                 </form>
             </div>
         </div>
-        <div class="login-page" ng-if="loginService.hasLoginData()">
+        <div ng-if="logged" class="login-page">
             <div class="form">
                 <form class="login-form">
-                    <button class="on-login" ng-click="enterTheMatrix()">Visit the city!</button>
                     <p class="message">
+                        Now, you can do everything with defined locations. 
+
                         Your private key is: <b>{{dataFromStorage.key}}</b><br />
                         <a href="#">Click here</a>, if your want to change your data.
                     </p>

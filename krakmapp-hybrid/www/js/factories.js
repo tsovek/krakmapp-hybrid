@@ -34,6 +34,16 @@
             }
             return allObjects.objects;
         },
+
+        getGuestInfo: function () {
+            let allObjects = localStorageService.get('objectsData');
+            return allObjects.client;
+        },
+
+        getHotelInfo: function () {
+            let allObjects = localStorageService.get('objectsData');
+            return allObjects.hotel;
+        },
         
         getMarkerByType: function (type) {
             var iconDefault = {
@@ -46,22 +56,27 @@
 
             switch (type) {
                 case "Monuments":
-                    iconDefault.url = 'http://localhost:8100/img/marker-red.png';
+                    iconDefault.url = 'img/marker-red.png';
                     return new google.maps.Marker({
                         icon: iconDefault
                     });
                 case "Entertainments":
-                    iconDefault.url = 'http://localhost:8100/img/marker-green.png';
+                    iconDefault.url = 'img/marker-green.png';
                     return new google.maps.Marker({
                         icon: iconDefault
                     });
                 case "Partners":
-                    iconDefault.url = 'http://localhost:8100/img/marker-blue.png';
+                    iconDefault.url = 'img/marker-blue.png';
+                    return new google.maps.Marker({
+                        icon: iconDefault
+                    });
+                case "You":
+                    iconDefault.url = 'img/you.png';
                     return new google.maps.Marker({
                         icon: iconDefault
                     });
                 default:
-                    iconDefault.url = 'http://localhost:8100/img/marker-pink.png';
+                    iconDefault.url = 'img/marker-pink.png';
                     return new google.maps.Marker({
                         icon: iconDefault
                     });

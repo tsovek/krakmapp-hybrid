@@ -1,42 +1,117 @@
 angular.module('krakmApp.controllers', [])
 
 .controller('AppCtrl', function ($scope, $state, loginService) {
+
     $scope.logout = function () {
         loginService.removeLoginData();
         $state.go('app.entrance');
     }
 })
 
-.controller('EntranceCtrl', function ($scope, $http, $state, loginService, objectsFactory) {
+.controller('EntranceCtrl', function ($scope, $http, $window, loginService, objectsFactory) {
+
+    $scope.$on('$ionicView.beforeEnter', function () {
+        $scope.logged = loginService.getLoginData();
+    });
+
     $scope.data = { hotelId: 0, key: "" };
 
-    $scope.enterTheMatrix = function () {
-        if (loginService.hasLoginData()) {
-            $state.go('app.mainMap');
-        }
-    }
     $scope.dataFromStorage = loginService.getLoginData();
 
     $scope.login = function (user) {
         $http({
             method: 'GET',
-            url: 'api/mobile/byHotelId',
+            url: 'http://192.168.0.12:5000/api/mobile/byHotelId',
             params: { hotelId: parseInt(user.hotelId, 10), key: user.key }
         }).then(function successCallback(response) {
-            loginService.setLoginData(user);
-            objectsFactory.setObjects(response.data);
+            if (response.status === 200) {
+                loginService.setLoginData(user);
+                objectsFactory.setObjects(response.data);
+                $scope.errorMsg = null;
 
-            $state.go('app.mainMap');
+                $window.location.reload(true);
+
+            } else {
+                $scope.errorMsg = "Something went wrong. Make sure of your data and try again.";
+            }
 
         }, function errorCallback(response) {
-            
+            $scope.errorMsg = "Something went terribly wrong! Check your network connection.";
         });
     }
 })
 
-.controller('MainMapCtrl', function ($scope, $compile, mapFactory, objectsFactory) {
+.controller('HotelCtrl', function ($scope, objectsFactory, mapFactory) {
+    $scope.$on("$ionicView.enter", function (event, data) {
+        $scope.onInit();
+    });
+
+    $scope.hotel = objectsFactory.getHotelInfo();
+
     $scope.onInit = function () {
         let mapOptions = mapFactory.getMapOptions();
+        var map = new google.maps.Map(document.getElementById("map-hotel"), mapOptions);
+
+        let pos = new google.maps.LatLng($scope.hotel.latitude, $scope.hotel.longitude)
+        let marker = objectsFactory.getMarkerByType("Partners");
+        marker.setPosition(pos);
+        marker.setMap(map);
+
+        map.setCenter(pos);
+        map.setZoom(12);
+
+        $scope.map = map;
+    };
+})
+
+.controller('ClientCtrl', function ($scope, objectsFactory) {
+    $scope.client = objectsFactory.getGuestInfo();
+})
+
+.controller('MainMapCtrl', function ($scope, mapFactory, objectsFactory, $cordovaGeolocation, $ionicPlatform) {
+
+    $scope.$on("$ionicView.enter", function (event, data) {
+        if (event.targetScope !== $scope)
+            return;
+        $scope.onInit();
+    });
+
+    $scope.markerModel = {
+        marker: null
+    };
+
+    $scope.setLocation = function (lat, lng) {
+        var pos = new google.maps.LatLng(lat, lng);
+
+        if ($scope.markerModel.marker !== null) {
+            marker.setMap(null);
+        }
+
+        $scope.markerModel.marker = objectsFactory.getMarkerByType('You');
+        $scope.markerModel.markermarker.setPosition(pos);
+        $scope.markerModel.markermarker.setMap($scope.map);
+
+        $scope.map.setCenter(pos);
+        $scope.map.setZoom(12);
+    };
+
+    $scope.getLocation = function () {
+        $ionicPlatform.ready(function () {
+            var posOptions = { timeout: 10000, enableHighAccuracy: false };
+            $cordovaGeolocation.getCurrentPosition(posOptions).then(
+              function (position) {
+                  let lat = position.coords.latitude;
+                  let long = position.coords.longitude;
+                  $scope.setLocation(lat, long);
+
+              }, function (err) {
+                  console.log(err.message + " " + err.code);
+              });
+        });
+    };
+
+    $scope.onInit = function () {
+        var mapOptions = mapFactory.getMapOptions();
         var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
         var allObjects = objectsFactory.getAllObjects();
@@ -47,8 +122,8 @@ angular.module('krakmApp.controllers', [])
             for (let j in objGroup.singleObjects) {
                 let singleObject = objGroup.singleObjects[j];
 
-                let pos = new google.maps.LatLng(singleObject.latitude, singleObject.longitude)
-                let marker = objectsFactory.getMarkerByType(objGroup.type);
+                var pos = new google.maps.LatLng(singleObject.latitude, singleObject.longitude)
+                var marker = objectsFactory.getMarkerByType(objGroup.type);
                 marker.setPosition(pos);
                 marker.setMap(map);
 
@@ -73,7 +148,7 @@ angular.module('krakmApp.controllers', [])
         })
     };
 
-    getInfo = function(object, type) {
+    getInfo = function (object, type) {
         let content =
             '<div id="content">' +
                 '<div id="siteNotice">' +
@@ -88,5 +163,5 @@ angular.module('krakmApp.controllers', [])
         }
         content += '</div>';
         return content;
-    }
+    };
 });
