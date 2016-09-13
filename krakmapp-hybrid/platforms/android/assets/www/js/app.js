@@ -74,6 +74,26 @@ angular.module('krakmApp', ['ionic',
                     controller: 'HotelCtrl'
                 }
             }
+        })
+
+        .state('app.routes', {
+            url: '/routes',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/routes.html',
+                    controller: 'RoutesCtrl'
+                }
+            }
+        })
+
+        .state('app.singleRoute', {
+            url: '/routes/:routeId',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/singleRoute.html',
+                    controller: 'SingleRouteCtrl'
+                }
+            }
         });
 
     $urlRouterProvider.otherwise('/app/entrance');

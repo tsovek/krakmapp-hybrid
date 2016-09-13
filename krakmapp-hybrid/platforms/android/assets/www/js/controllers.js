@@ -168,4 +168,79 @@ angular.module('krakmApp.controllers', [])
         content += '</div>';
         return content;
     };
+})
+
+.controller('RoutesCtrl', function ($scope, objectsFactory, $state) {
+    $scope.routesModel = {
+        allRoutes: objectsFactory.getRoutes()
+    };
+
+    $scope.onClick = function (route) {
+        $state.go('app.singleRoute', { routeId: route.id});
+    };
+})
+
+.controller('SingleRouteCtrl', function ($scope, $stateParams, routesFactory, mapFactory, $cordovaGeolocation, $ionicPlatform) {
+
+    $scope.$on("$ionicView.enter", function (event, data) {
+        if (event.targetScope !== $scope)
+            return;
+        $scope.onInit();
+    });
+
+    $scope.routeModel = {
+        route: routesFactory.getById($stateParams.routeId),
+        points: []
+    };
+
+    $scope.onInit = function () {
+        var directionsService = new google.maps.DirectionsService;
+        var directionsDisplay = new google.maps.DirectionsRenderer;
+        $scope.map = new google.maps.Map(document.getElementById('map-singleRoute'),
+            mapFactory.getMapOptions());
+
+        directionsDisplay.setMap($scope.map);
+        $scope.calculateAndDisplayRoute(directionsService, directionsDisplay);
+    };
+
+    $scope.calculateAndDisplayRoute = function (directionsService, directionsDisplay) {
+        var waypts = [];
+        for (let i in $scope.routeModel.route.routeDetails) {
+            var detail = $scope.routeModel.route.routeDetails[i];
+            waypts.push({
+                location: new google.maps.LatLng(detail.latitude, detail.longitude),
+                stopover: true
+            });
+        }
+        
+        var first = waypts[0];
+        var last = waypts[waypts.length - 1];
+        waypts.splice(0, 1);
+        waypts.splice(waypts.length - 1, 1);
+
+        directionsService.route({
+            origin: first.location,
+            destination: last.location,
+            waypoints: waypts,
+            optimizeWaypoints: false,
+            travelMode: 'WALKING'
+        }, function (response, status) {
+            if (status === 'OK') {
+                directionsDisplay.setDirections(response);
+                var route = response.routes[0];
+                for (let i in route.legs) {
+                    var leg = route.legs[i];
+                    $scope.routeModel.points.push({
+                        start_address: leg.start_address.substr(0, leg.start_address.indexOf(',')),
+                        end_address: leg.end_address.substr(0, leg.end_address.indexOf(',')),
+                        distance: leg.distance,
+                        steps: leg.steps
+                    });
+                }
+
+            } else {
+                window.alert('Directions request failed due to ' + status);
+            }
+        });
+    }
 });

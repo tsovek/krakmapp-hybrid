@@ -44,6 +44,11 @@
             let allObjects = localStorageService.get('objectsData');
             return allObjects.hotel;
         },
+
+        getRoutes: function() {
+            let allObjects = localStorageService.get('objectsData');
+            return allObjects.allRoutes;
+        },
         
         getMarkerByType: function (type) {
             var iconDefault = {
@@ -86,7 +91,7 @@
 })
 .factory('mapFactory', function() {
     return {
-        getCenter: function() {
+        getCenter: function () {
             return new google.maps.LatLng(50.0666501, 19.9449799);
         },
 
@@ -122,5 +127,18 @@
                 scaleControl: true
             };
         }
-    }
+    };
+})
+.factory('routesFactory', function (objectsFactory) {
+    return {
+        getById: function (routeId) {
+            var allRoutes = objectsFactory.getRoutes();
+            for (var i in allRoutes.routes) {
+                var route = allRoutes.routes[i];
+                if (route.id == routeId) {
+                    return route;
+                }
+            }
+        }
+    };
 });

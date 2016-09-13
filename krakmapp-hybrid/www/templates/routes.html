@@ -1,0 +1,24 @@
+﻿<ion-view view-title="All routes" ng-controller="RoutesCtrl">
+    <ion-content class="login-body">
+        <div style="margin-top: 50px">
+            <h1 class="text-center">
+                <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                KrakmApp
+            </h1>
+            <h5 class="text-center">Select route and visit the city!</h5>
+        </div>
+
+        <div class="list" style="margin-top: 30px">
+            <a ng-repeat="route in routesModel.allRoutes.routes"
+               class="item item-thumbnail-left"
+               ng-click="onClick(route)">
+                <img src="img/route.jpg">
+                <h2>{{route.name}}</h2>
+                <p>
+                    (length: {{route.length}}km)<br />
+                    {{route.description}}
+                </p>
+            </a>
+        </div>
+    </ion-content>
+</ion-view>
