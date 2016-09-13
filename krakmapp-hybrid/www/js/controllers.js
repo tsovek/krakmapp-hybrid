@@ -77,22 +77,26 @@ angular.module('krakmApp.controllers', [])
     });
 
     $scope.markerModel = {
-        marker: null
+        markers: []
     };
 
     $scope.setLocation = function (lat, lng) {
         var pos = new google.maps.LatLng(lat, lng);
 
-        if ($scope.markerModel.marker !== null) {
-            marker.setMap(null);
+        if ($scope.markerModel.markers.length > 0) {
+            for (let i in $scope.markerModel.markers) {
+                let markerToRemove = $scope.markerModel.markers[i];
+                markerToRemove.setMap(null);
+            }
         }
 
-        $scope.markerModel.marker = objectsFactory.getMarkerByType('You');
-        $scope.markerModel.markermarker.setPosition(pos);
-        $scope.markerModel.markermarker.setMap($scope.map);
+        var marker = objectsFactory.getMarkerByType('You');
+        marker.setPosition(pos);
+        marker.setMap($scope.map);
+        $scope.markerModel.markers.push(marker);
 
         $scope.map.setCenter(pos);
-        $scope.map.setZoom(12);
+        $scope.map.setZoom(18);
     };
 
     $scope.getLocation = function () {
