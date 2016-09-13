@@ -8,13 +8,13 @@
             <h5 class="text-center">Select route and visit the city!</h5>
         </div>
 
-        <div class="list" style="margin-top: 30px">
+        <div style="margin-top: 30px">
             <a ng-repeat="route in routesModel.allRoutes.routes"
-               class="item item-thumbnail-left"
+               class="item item-thumbnail-left item-borderless"
                ng-click="onClick(route)">
                 <img src="img/route.jpg">
                 <h2>{{route.name}}</h2>
-                <p>
+                <p style="white-space: normal">
                     (length: {{route.length}}km)<br />
                     {{route.description}}
                 </p>

@@ -1,11 +1,11 @@
-﻿<ion-view view-title="Route {{routeModel.route.name}}" ng-controller="SingleRouteCtrl">
+﻿<ion-view view-title="Route: {{routeModel.route.name}}" ng-controller="SingleRouteCtrl">
     <ion-content class="login-body">
         <button class="button button-bar-stable button-fab button-fab-top-right">
             <i class="icon ion-ios-navigate"></i>
         </button>
         <div id="map-singleRoute" data-tap-disabled="true" style="height: 70%"></div>
         <ion-scroll class="scroll-view" direction="y" style="height: 30%">
-            <table class="table" ng-if="routeModel.points.length > 0" ng-repeat="point in routeModel.points">
+            <table class="table" ng-repeat="point in routeModel.points">
                 <tr>
                     <td width="5%" align="right">:</td>
                     <td colspan="2" width="95%">

@@ -237,6 +237,7 @@ angular.module('krakmApp.controllers', [])
                         steps: leg.steps
                     });
                 }
+                $scope.$apply();
 
             } else {
                 window.alert('Directions request failed due to ' + status);
