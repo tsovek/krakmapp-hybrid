@@ -4,8 +4,8 @@
         <param name="browser-package" value="Device" />
     </feature>
     <name>krakmapp-hybrid</name>
-    <description>An Ionic Framework and Cordova project for Visual Studio</description>
-    <author email="vscordovatools@microsoft.com" href="http://taco.visualstudio.com">Visual Studio JS Mobile Tooling</author>
+    <description>KrakmApp mobile.</description>
+    <author email="vscordovatools@microsoft.com" href="http://taco.visualstudio.com">Tomasz Sowa</author>
     <content src="index.html" />
     <access origin="*" />
     <preference name="webviewbounce" value="false" />

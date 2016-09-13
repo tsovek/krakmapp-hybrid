@@ -1,56 +1,167 @@
-angular.module('starter.controllers', [])
+angular.module('krakmApp.controllers', [])
 
-.controller('AppCtrl', function($scope, $ionicModal, $timeout) {
+.controller('AppCtrl', function ($scope, $state, loginService) {
 
-  // With the new view caching in Ionic, Controllers are only called
-  // when they are recreated or on app start, instead of every page change.
-  // To listen for when this page is active (for example, to refresh data),
-  // listen for the $ionicView.enter event:
-  //$scope.$on('$ionicView.enter', function(e) {
-  //});
-
-  // Form data for the login modal
-  $scope.loginData = {};
-
-  // Create the login modal that we will use later
-  $ionicModal.fromTemplateUrl('templates/login.html', {
-    scope: $scope
-  }).then(function(modal) {
-    $scope.modal = modal;
-  });
-
-  // Triggered in the login modal to close it
-  $scope.closeLogin = function() {
-    $scope.modal.hide();
-  };
-
-  // Open the login modal
-  $scope.login = function() {
-    $scope.modal.show();
-  };
-
-  // Perform the login action when the user submits the login form
-  $scope.doLogin = function() {
-    console.log('Doing login', $scope.loginData);
-
-    // Simulate a login delay. Remove this and replace with your login
-    // code if using a login system
-    $timeout(function() {
-      $scope.closeLogin();
-    }, 1000);
-  };
+    $scope.logout = function () {
+        loginService.removeLoginData();
+        $state.go('app.entrance');
+    }
 })
 
-.controller('PlaylistsCtrl', function($scope) {
-  $scope.playlists = [
-    { title: 'Reggae', id: 1 },
-    { title: 'Chill', id: 2 },
-    { title: 'Dubstep', id: 3 },
-    { title: 'Indie', id: 4 },
-    { title: 'Rap', id: 5 },
-    { title: 'Cowbell', id: 6 }
-  ];
+.controller('EntranceCtrl', function ($scope, $http, $window, loginService, objectsFactory) {
+
+    $scope.$on('$ionicView.beforeEnter', function () {
+        $scope.logged = loginService.getLoginData();
+    });
+
+    $scope.data = { hotelId: 0, key: "" };
+
+    $scope.dataFromStorage = loginService.getLoginData();
+
+    $scope.login = function (user) {
+        $http({
+            method: 'GET',
+            url: 'http://192.168.0.12:5000/api/mobile/byHotelId',
+            params: { hotelId: parseInt(user.hotelId, 10), key: user.key }
+        }).then(function successCallback(response) {
+            if (response.status === 200) {
+                loginService.setLoginData(user);
+                objectsFactory.setObjects(response.data);
+                $scope.errorMsg = null;
+
+                $window.location.reload(true);
+
+            } else {
+                $scope.errorMsg = "Something went wrong. Make sure of your data and try again.";
+            }
+
+        }, function errorCallback(response) {
+            $scope.errorMsg = "Something went terribly wrong! Check your network connection.";
+        });
+    }
 })
 
-.controller('PlaylistCtrl', function($scope, $stateParams) {
+.controller('HotelCtrl', function ($scope, objectsFactory, mapFactory) {
+    $scope.$on("$ionicView.enter", function (event, data) {
+        $scope.onInit();
+    });
+
+    $scope.hotel = objectsFactory.getHotelInfo();
+
+    $scope.onInit = function () {
+        let mapOptions = mapFactory.getMapOptions();
+        var map = new google.maps.Map(document.getElementById("map-hotel"), mapOptions);
+
+        let pos = new google.maps.LatLng($scope.hotel.latitude, $scope.hotel.longitude)
+        let marker = objectsFactory.getMarkerByType("Partners");
+        marker.setPosition(pos);
+        marker.setMap(map);
+
+        map.setCenter(pos);
+        map.setZoom(12);
+
+        $scope.map = map;
+    };
+})
+
+.controller('ClientCtrl', function ($scope, objectsFactory) {
+    $scope.client = objectsFactory.getGuestInfo();
+})
+
+.controller('MainMapCtrl', function ($scope, mapFactory, objectsFactory, $cordovaGeolocation, $ionicPlatform) {
+
+    $scope.$on("$ionicView.enter", function (event, data) {
+        if (event.targetScope !== $scope)
+            return;
+        $scope.onInit();
+    });
+
+    $scope.markerModel = {
+        marker: null
+    };
+
+    $scope.setLocation = function (lat, lng) {
+        var pos = new google.maps.LatLng(lat, lng);
+
+        if ($scope.markerModel.marker !== null) {
+            marker.setMap(null);
+        }
+
+        $scope.markerModel.marker = objectsFactory.getMarkerByType('You');
+        $scope.markerModel.markermarker.setPosition(pos);
+        $scope.markerModel.markermarker.setMap($scope.map);
+
+        $scope.map.setCenter(pos);
+        $scope.map.setZoom(12);
+    };
+
+    $scope.getLocation = function () {
+        $ionicPlatform.ready(function () {
+            var posOptions = { timeout: 10000, enableHighAccuracy: false };
+            $cordovaGeolocation.getCurrentPosition(posOptions).then(
+              function (position) {
+                  let lat = position.coords.latitude;
+                  let long = position.coords.longitude;
+                  $scope.setLocation(lat, long);
+
+              }, function (err) {
+                  console.log(err.message + " " + err.code);
+              });
+        });
+    };
+
+    $scope.onInit = function () {
+        var mapOptions = mapFactory.getMapOptions();
+        var map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+        var allObjects = objectsFactory.getAllObjects();
+        var bounds = new google.maps.LatLngBounds();
+        for (let i in allObjects.objects) {
+            let objGroup = allObjects.objects[i];
+
+            for (let j in objGroup.singleObjects) {
+                let singleObject = objGroup.singleObjects[j];
+
+                var pos = new google.maps.LatLng(singleObject.latitude, singleObject.longitude)
+                var marker = objectsFactory.getMarkerByType(objGroup.type);
+                marker.setPosition(pos);
+                marker.setMap(map);
+
+                attachWindow(marker, singleObject, objGroup.type);
+
+                bounds.extend(pos);
+            }
+        }
+        map.fitBounds(bounds);
+
+        $scope.map = map;
+    };
+
+    attachWindow = function(marker, obj, type) {
+        var infowindow = new google.maps.InfoWindow({
+            content: this.getInfo(obj, type),
+            maxWidth: 350
+        });
+
+        marker.addListener('click', function () {
+            infowindow.open(marker.get('map'), marker);
+        })
+    };
+
+    getInfo = function (object, type) {
+        let content =
+            '<div id="content">' +
+                '<div id="siteNotice">' +
+                // todo: image
+                '</div>' +
+                '<h4 class="firstHeading">' + object.name + '</h4>' +
+                '<div id="bodyContent">' +
+                    '<p>' + object.description + '</p>' +
+                '</div>';
+        if (type === "Partners") {
+            content += '<br /><div><a class="btn btn-block btn-info">Get Discount!</a></div>';
+        }
+        content += '</div>';
+        return content;
+    };
 });
