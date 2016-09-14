@@ -1,12 +1,12 @@
-﻿<ion-view cache-view="false" view-title="Entrance" ng-controller="EntranceCtrl">
+﻿<ion-view cache-view="false" view-title="Entrance" ng-controller="EntranceCtrl" ng-init="onInit()">
     <ion-content class="login-body">
-        <div style="margin-top: 50px">
+        <div ng-if="!logged" style="margin-top: 50px">
             <h1 class="text-center">
                 <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
                 KrakmApp
             </h1>
         </div>
-        <div  ng-if="!logged" class="login-page">
+        <div ng-if="!logged" class="login-page">
             <div class="form">
                 <form class="login-form">
                     <label ng-if="errorMsg" class="label label-danger">{{errorMsg}}</label>
@@ -16,18 +16,6 @@
                     <p class="message">
                         Have no key?<br />
                         <a href="#">Send email to front-office manager</a>
-                    </p>
-                </form>
-            </div>
-        </div>
-        <div ng-if="logged" class="login-page">
-            <div class="form">
-                <form class="login-form">
-                    <p class="message">
-                        Now, you can do everything with defined locations. 
-
-                        Your private key is: <b>{{dataFromStorage.key}}</b><br />
-                        <a href="#">Click here</a>, if your want to change your data.
                     </p>
                 </form>
             </div>

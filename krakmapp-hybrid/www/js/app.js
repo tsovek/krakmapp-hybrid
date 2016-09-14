@@ -94,6 +94,15 @@ angular.module('krakmApp', ['ionic',
                     controller: 'SingleRouteCtrl'
                 }
             }
+        })
+
+        .state('app.nativeConfig', {
+            url: '/nativeConfig',
+            views: {
+                'menuContent': {
+                    templateUrl: 'templates/nativeConfig.html'
+                }
+            }
         });
 
     $urlRouterProvider.otherwise('/app/entrance');

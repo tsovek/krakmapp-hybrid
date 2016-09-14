@@ -8,17 +8,55 @@ angular.module('krakmApp.controllers', [])
     }
 })
 
-.controller('EntranceCtrl', function ($scope, $http, $window, loginService, objectsFactory) {
+.controller('EntranceCtrl', function ($scope, $state, $http, loginService, objectsFactory, $ionicLoading, $ionicHistory, $ionicPopup) {
 
     $scope.$on('$ionicView.beforeEnter', function () {
         $scope.logged = loginService.getLoginData();
     });
+
+    $scope.onInit = function () {
+        if (!loginService.getLoginData()) {
+            return;
+        }
+
+        var banner = objectsFactory.getActualBanner();
+        var title = '<div class="text-center">' +
+            '<img width="220" src="img/' + banner.imageUrl + '">'
+            '</div>';
+        var myPopup = $ionicPopup.show({
+            template: title,
+            title: banner.name,
+            subTitle: banner.description,
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'got it',
+                  type: 'btn btn-block btn-info',
+                  onTap: function (e) {
+                      $ionicHistory.nextViewOptions({
+                          disableBack: true
+                      });
+
+                      $state.go('app.mainMap');
+                  }
+              }
+            ]
+        });
+    };
 
     $scope.data = { hotelId: 0, key: "" };
 
     $scope.dataFromStorage = loginService.getLoginData();
 
     $scope.login = function (user) {
+        $ionicLoading.show({
+            content: 'Loading',
+            animation: 'fade-in',
+            showBackdrop: true,
+            maxWidth: 200,
+            showDelay: 0
+        });
+
         $http({
             method: 'GET',
             url: 'http://192.168.0.12:5000/api/mobile/byHotelId',
@@ -29,7 +67,13 @@ angular.module('krakmApp.controllers', [])
                 objectsFactory.setObjects(response.data);
                 $scope.errorMsg = null;
 
-                $window.location.reload(true);
+                $ionicLoading.hide();
+
+                $ionicHistory.nextViewOptions({
+                    disableBack: true
+                });
+
+                $state.go('app.mainMap');
 
             } else {
                 $scope.errorMsg = "Something went wrong. Make sure of your data and try again.";
@@ -68,7 +112,7 @@ angular.module('krakmApp.controllers', [])
     $scope.client = objectsFactory.getGuestInfo();
 })
 
-.controller('MainMapCtrl', function ($scope, mapFactory, objectsFactory, $cordovaGeolocation, $ionicPlatform) {
+.controller('MainMapCtrl', function ($interval, loginService, $scope, mapFactory, objectsFactory, $cordovaGeolocation, $ionicPlatform, $ionicPopup, $ionicLoading) {
 
     $scope.$on("$ionicView.enter", function (event, data) {
         if (event.targetScope !== $scope)
@@ -149,24 +193,60 @@ angular.module('krakmApp.controllers', [])
 
         marker.addListener('click', function () {
             infowindow.open(marker.get('map'), marker);
-        })
+        });
     };
 
     getInfo = function (object, type) {
         let content =
             '<div id="content">' +
                 '<div id="siteNotice">' +
-                // todo: image
+                '<img width="310" src="img/' + object.imageUrl + '">' +
                 '</div>' +
+                '<br />' +
                 '<h4 class="firstHeading">' + object.name + '</h4>' +
                 '<div id="bodyContent">' +
                     '<p>' + object.description + '</p>' +
                 '</div>';
         if (type === "Partners") {
-            content += '<br /><div><a class="btn btn-block btn-info">Get Discount!</a></div>';
+            content += '<br /><div><a class="btn btn-block btn-info" onClick="getDiscount()">' +
+            'Get Discount!</a></div>';
         }
         content += '</div>';
         return content;
+    };
+
+    $scope.countDown = 3;
+
+    getDiscount = function () {
+        var readyToDiscount = false;
+        stop = $interval(function () {
+            $scope.countDown--;
+            if ($scope.countDown === 0) {
+                $interval.cancel(stop);
+                $scope.readyToDiscount = true;
+            }
+        }, 1000, 0);
+
+        let key = loginService.getLoginData().key;
+        var title = '<div class="text-center">' +
+            '<p>You can get 30% discount!</p>' +
+            '<br />' +
+            '<ion-spinner ng-if="!readyToDiscount" icon="spiral"></ion-spinner>' +
+            '<h2 ng-if="readyToDiscount">' + key + '</h2>' +
+            '<br /><br />' +
+            '</div>';
+        var myPopup = $ionicPopup.show({
+            template: title,
+            title: 'Realize by your code',
+            subTitle: 'Please wait for synchronization with server. When key displayed, show it stuff.',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'close',
+                  type: 'btn btn-block btn-info'
+              }
+            ]
+        });
     };
 })
 
@@ -180,7 +260,7 @@ angular.module('krakmApp.controllers', [])
     };
 })
 
-.controller('SingleRouteCtrl', function ($scope, $stateParams, routesFactory, objectsFactory, mapFactory, $cordovaGeolocation, $ionicPlatform) {
+.controller('SingleRouteCtrl', function (loginService, $scope, $ionicPopup, $interval, $stateParams, routesFactory, objectsFactory, mapFactory, $cordovaGeolocation, $ionicPlatform) {
 
     $scope.$on("$ionicView.enter", function (event, data) {
         if (event.targetScope !== $scope)
@@ -313,16 +393,52 @@ angular.module('krakmApp.controllers', [])
         let content =
             '<div id="content">' +
                 '<div id="siteNotice">' +
-                // todo: image
+                '<img width="310" src="img/' + object.imageUrl + '">' +
                 '</div>' +
+                '<br />' +
                 '<h4 class="firstHeading">' + object.name + '</h4>' +
                 '<div id="bodyContent">' +
                     '<p>' + object.description + '</p>' +
                 '</div>';
         if (type === "Partners") {
-            content += '<br /><div><a class="btn btn-block btn-info">Get Discount!</a></div>';
+            content += '<br /><div><a class="btn btn-block btn-info" onClick="getDiscount()">' +
+            'Get Discount!</a></div>';
         }
         content += '</div>';
         return content;
+    };
+
+    $scope.countDown = 3;
+
+    getDiscount = function () {
+        var readyToDiscount = false;
+        stop = $interval(function () {
+            $scope.countDown--;
+            if ($scope.countDown === 0) {
+                $interval.cancel(stop);
+                $scope.readyToDiscount = true;
+            }
+        }, 1000, 0);
+
+        let key = loginService.getLoginData().key;
+        var title = '<div class="text-center">' +
+            '<p>You can get 30% discount!</p>' +
+            '<br />' +
+            '<ion-spinner ng-if="!readyToDiscount" icon="spiral"></ion-spinner>' +
+            '<h2 ng-if="readyToDiscount">' + key + '</h2>' +
+            '<br /><br />' +
+            '</div>';
+        var myPopup = $ionicPopup.show({
+            template: title,
+            title: 'Realize by your code',
+            subTitle: 'Please wait for synchronization with server. When key displayed, show it stuff.',
+            scope: $scope,
+            buttons: [
+              {
+                  text: 'close',
+                  type: 'btn btn-block btn-info'
+              }
+            ]
+        });
     };
 });

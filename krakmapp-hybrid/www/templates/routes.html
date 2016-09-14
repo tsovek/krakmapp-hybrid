@@ -12,10 +12,14 @@
             <a ng-repeat="route in routesModel.allRoutes.routes"
                class="item item-thumbnail-left item-borderless"
                ng-click="onClick(route)">
-                <img src="img/route.jpg">
+                <img ng-if="route.id === 10" src="img/items/fast.jpg">
+                <img ng-if="route.id === 11" src="img/items/cheap.jpg">
+                <img ng-if="route.id === 12" src="img/items/complex.jpg">
                 <h2>{{route.name}}</h2>
                 <p style="white-space: normal">
-                    (length: {{route.length}}km)<br />
+                    <div ng-if="route.id === 10">(length: <b>4,5</b>km)<br /></div>
+                    <div ng-if="route.id === 11">(length: <b>3,6</b>km)<br /></div>
+                    <div ng-if="route.id === 12">(length: <b>24,3</b>km)<br /></div>
                     {{route.description}}
                 </p>
             </a>

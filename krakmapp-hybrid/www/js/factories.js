@@ -25,6 +25,11 @@
             localStorageService.set('objectsData', objects);
         },
 
+        getActualBanner: function () {
+            let allObjects = localStorageService.get('objectsData');
+            return allObjects.allBanners.banners[0];
+        },
+
         getAllObjects: function () {
             let allObjects = localStorageService.get('objectsData');
             if (allObjects === null) {
