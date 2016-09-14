@@ -54,7 +54,7 @@
             var iconDefault = {
                 size: new google.maps.Size(88, 126),
                 origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(17, 34),
+                anchor: new google.maps.Point(22, 60),
                 scaledSize: new google.maps.Size(44, 63)
             };
             var marker = {};

@@ -180,7 +180,7 @@ angular.module('krakmApp.controllers', [])
     };
 })
 
-.controller('SingleRouteCtrl', function ($scope, $stateParams, routesFactory, mapFactory, $cordovaGeolocation, $ionicPlatform) {
+.controller('SingleRouteCtrl', function ($scope, $stateParams, routesFactory, objectsFactory, mapFactory, $cordovaGeolocation, $ionicPlatform) {
 
     $scope.$on("$ionicView.enter", function (event, data) {
         if (event.targetScope !== $scope)
@@ -188,22 +188,53 @@ angular.module('krakmApp.controllers', [])
         $scope.onInit();
     });
 
+    $scope.setLocation = function (lat, lng) {
+        for (let i in $scope.routeModel.locMarker) {
+            $scope.routeModel.locMarker[i].setMap(null);
+        }
+
+        var pos = new google.maps.LatLng(lat, lng);
+        var marker = objectsFactory.getMarkerByType("You");
+        marker.setPosition(pos);
+        marker.setMap($scope.map);
+
+        $scope.routeModel.locMarker.push(marker);
+        $scope.calculateAndDisplayRoute({ location: pos });
+    };
+
+    $scope.getLocation = function () {
+        $ionicPlatform.ready(function () {
+            var posOptions = { timeout: 10000, enableHighAccuracy: false };
+            $cordovaGeolocation.getCurrentPosition(posOptions).then(
+              function (position) {
+                  let lat = position.coords.latitude;
+                  let long = position.coords.longitude;
+                  $scope.setLocation(lat, long);
+
+              }, function (err) {
+                  console.log(err.message + " " + err.code);
+              });
+        });
+    };
+
     $scope.routeModel = {
         route: routesFactory.getById($stateParams.routeId),
-        points: []
+        points: [],
+        markers: [],
+        locMarker: []
     };
 
     $scope.onInit = function () {
-        var directionsService = new google.maps.DirectionsService;
-        var directionsDisplay = new google.maps.DirectionsRenderer;
+        $scope.directionsService = new google.maps.DirectionsService;
+        $scope.directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
         $scope.map = new google.maps.Map(document.getElementById('map-singleRoute'),
             mapFactory.getMapOptions());
 
-        directionsDisplay.setMap($scope.map);
-        $scope.calculateAndDisplayRoute(directionsService, directionsDisplay);
+        $scope.directionsDisplay.setMap($scope.map);
+        $scope.calculateAndDisplayRoute(null);
     };
 
-    $scope.calculateAndDisplayRoute = function (directionsService, directionsDisplay) {
+    $scope.calculateAndDisplayRoute = function (origin) {
         var waypts = [];
         for (let i in $scope.routeModel.route.routeDetails) {
             var detail = $scope.routeModel.route.routeDetails[i];
@@ -213,12 +244,16 @@ angular.module('krakmApp.controllers', [])
             });
         }
         
-        var first = waypts[0];
+        var first = origin
+        if (origin === null) {
+            first = waypts[0];
+            waypts.splice(0, 1);
+        }
+
         var last = waypts[waypts.length - 1];
-        waypts.splice(0, 1);
         waypts.splice(waypts.length - 1, 1);
 
-        directionsService.route({
+        $scope.directionsService.route({
             origin: first.location,
             destination: last.location,
             waypoints: waypts,
@@ -226,8 +261,9 @@ angular.module('krakmApp.controllers', [])
             travelMode: 'WALKING'
         }, function (response, status) {
             if (status === 'OK') {
-                directionsDisplay.setDirections(response);
+                $scope.directionsDisplay.setDirections(response);
                 var route = response.routes[0];
+                $scope.routeModel.points.splice(0, $scope.routeModel.points.length);
                 for (let i in route.legs) {
                     var leg = route.legs[i];
                     $scope.routeModel.points.push({
@@ -239,9 +275,54 @@ angular.module('krakmApp.controllers', [])
                 }
                 $scope.$apply();
 
+                for (let i in $scope.routeModel.markers) {
+                    $scope.routeModel.markers[i].setMap(null);
+                }
+
+                $scope.routeModel.markers.splice(0, $scope.routeModel.markers.length);
+                for (let i in $scope.routeModel.route.routeDetails) {
+                    var detail = $scope.routeModel.route.routeDetails[i];
+
+                    var marker = objectsFactory.getMarkerByType(detail.type);
+                    marker.setPosition(new google.maps.LatLng(detail.latitude, detail.longitude));
+                    marker.setMap($scope.map);
+
+                    attachWindow(marker, detail, detail.type);
+
+                    $scope.routeModel.markers.push(marker);
+                }
+
             } else {
                 window.alert('Directions request failed due to ' + status);
             }
         });
     }
+
+    attachWindow = function (marker, obj, type) {
+        var infowindow = new google.maps.InfoWindow({
+            content: this.getInfo(obj, type),
+            maxWidth: 350
+        });
+
+        marker.addListener('click', function () {
+            infowindow.open(marker.get('map'), marker);
+        })
+    };
+
+    getInfo = function (object, type) {
+        let content =
+            '<div id="content">' +
+                '<div id="siteNotice">' +
+                // todo: image
+                '</div>' +
+                '<h4 class="firstHeading">' + object.name + '</h4>' +
+                '<div id="bodyContent">' +
+                    '<p>' + object.description + '</p>' +
+                '</div>';
+        if (type === "Partners") {
+            content += '<br /><div><a class="btn btn-block btn-info">Get Discount!</a></div>';
+        }
+        content += '</div>';
+        return content;
+    };
 });
